@@ -21,7 +21,7 @@ define(function ( /* require, exports, module */ ) {
 	}
 
 	function table_maker(oldData) {
-		console.log(oldData);
+		//console.log(oldData);
 		var table;
 		var tbody;
 		var row1 = false;
@@ -29,6 +29,7 @@ define(function ( /* require, exports, module */ ) {
 		var tr;
 		var td;
 		var all_elm;
+		var attrArr = ["width", "height", "style", "class", "data-sheets-value", "data-sheets-numberformat", "data-sheets-formula", "data-sheets-note"];
 		clipboard = $(oldData);
 		//console.log(clipboard);
 		[].forEach.call(clipboard, function (elm) {
@@ -38,9 +39,9 @@ define(function ( /* require, exports, module */ ) {
 		});
 		tbody = table.querySelector("tbody");
 		tr = tbody.children;
-		all_elm = table.querySelectorAll("*");
-		td = table.querySelectorAll("td");
-		
+		all_elm = tbody.querySelectorAll("*");
+		td = tbody.querySelectorAll("td");
+
 		if (tr.length === 1) { //1行かどうか
 			row1 = true;
 			//console.log("1行!");
@@ -51,8 +52,8 @@ define(function ( /* require, exports, module */ ) {
 			}
 		});
 
-		[].forEach.call(all_elm, function (elm) {//余分な要素を削除
-			["width", "height", "style", "class"].forEach(function(attr){
+		[].forEach.call(all_elm, function (elm) { //余分な属性を削除
+			attrArr.forEach(function (attr) {
 				elm.removeAttribute(attr);
 			});
 		});
@@ -65,22 +66,22 @@ define(function ( /* require, exports, module */ ) {
 		if (row1 || col1) {
 			//console.log("1行または1列なので、何もしない!");
 			//console.log(td);
-			if (td.length === 1) {//1セルのみなら改行取っ太郎。
+			if (td.length === 1) { //1セルのみなら改行取っ太郎。
 				noIndention(tbody.children[0].children[0].textContent);
 			}
 			return;
 		}
 
 		//[th]が付いてたらthに差し替え。
-		[].forEach.call(td, function(elm, i, arr){
-			if(/^\[th\]/.test(elm.innerHTML)){
+		[].forEach.call(td, function (elm, i, arr) {
+			if (/^\[th\]/.test(elm.innerHTML)) {
 				var th = document.createElement("th");
 				th.innerHTML = elm.innerHTML.replace(/^\[th\]/, "");
 				elm.parentNode.insertBefore(th, elm);
 				elm.parentNode.removeChild(elm);
 			}
 		});
-		
+
 		table = tbody.innerHTML;
 		table = table.replace(/<!--(.*?)-->\n/g, "");
 		table = table.replace(/<br>\n/gm, "<br>");
