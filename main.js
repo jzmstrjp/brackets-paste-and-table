@@ -26,6 +26,7 @@ define(function ( /* require, exports, module */ ) {
 		var row1 = false;
 		var col1 = true;
 		var tr;
+		var td;
 		clipboard = $(oldData);
 		//console.log(clipboard);
 		[].forEach.call(clipboard, function (elm) {
@@ -33,20 +34,16 @@ define(function ( /* require, exports, module */ ) {
 				table = elm;
 			}
 		});
-		table = $(table)[0].children;
-		//console.log(table);
-		[].forEach.call(table, function (elm) {
-			if (elm.nodeName === "TBODY") {
-				tbody = elm;
-			}
-		});
+		tbody = table.querySelector("tbody");
 		tr = tbody.children;
+		td = table.querySelectorAll("td");
+		
 		if (tr.length === 1) { //1行かどうか
 			row1 = true;
 			//console.log("1行!");
 		}
 		[].forEach.call(tr, function (elm) {
-			if (elm.children.length !== 1) { //全行が1列かどうか
+			if (elm.children.length > 1) { //全行が1列以下かどうか
 				col1 = false;
 			}
 		});
@@ -56,11 +53,23 @@ define(function ( /* require, exports, module */ ) {
 
 		if (row1 || col1) {
 			//console.log("1行または1列なので、何もしない!");
-			if (row1 && col1) {
+			//console.log(td);
+			if (td.length === 1) {//1セルのみなら改行取っ太郎。
 				noIndention(tbody.children[0].children[0].textContent);
 			}
 			return;
 		}
+
+		//tdが特定のクラスを持っていたらthに差し替え。
+		/*[].forEach.call(td, function(elm, i, arr){
+			if(elm.classList.contains("xl65") || elm.classList.contains("xl66")){
+				var th = document.createElement("th");
+				th.innerHTML = elm.innerHTML;
+				elm.parentNode.insertBefore(th, elm);
+				elm.parentNode.removeChild(elm);
+			}
+		}); */
+		
 		table = tbody.innerHTML;
 		table = table.replace(/<!--(.*?)-->\n/g, "");
 		table = table.replace(/ (width|height|style|class)="(.*?)"/g, "");
@@ -74,7 +83,6 @@ define(function ( /* require, exports, module */ ) {
 	function noIndention(moji) {
 		//console.log("noIndention");
 		codeMirror.replaceRange(moji, _change_from, _from);
-		reindent(codeMirror, _change_from.line, _change_from.line * 1 + moji.match(/\n/mig).length + 1);
 	}
 
 	MainViewManager.on("currentFileChange", function () {

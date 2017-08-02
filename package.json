@@ -2,7 +2,7 @@
     "name": "jzmstrjp.paste-and-table",
     "title": "Excel To Table",
     "description": "please copy and paste from Excel, and this extension makes table tag.",
-    "version": "1.0.1",
+    "version": "1.0.3",
     "author": "jzmstrjp",
     "license": "MIT",
     "homepage": "https://github.com/jzmstrjp/brackets-paste-and-table",
