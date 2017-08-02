@@ -1,8 +1,8 @@
 {
     "name": "jzmstrjp.paste-and-table",
     "title": "Excel To Table",
-    "description": "please copy and paste from Excel, and this extension makes table tag.",
-    "version": "1.0.3",
+    "description": "Please copy and paste from Excel, and this extension makes table. If you put the word [th] at the beginning of the cell, the cell becomes a th tag.",
+    "version": "1.0.4",
     "author": "jzmstrjp",
     "license": "MIT",
     "homepage": "https://github.com/jzmstrjp/brackets-paste-and-table",
@@ -18,7 +18,7 @@
     ],
     "package-i18n": {
         "ja": {
-            "description": "エクセルからコピペするとテーブルになります。",
+            "description": "エクセルからコピペするとテーブルになります。セルの最初に[th]という文字を入れるとthタグになります。",
             "title": "テーブル作っ太郎"
         }
     }

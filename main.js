@@ -21,12 +21,14 @@ define(function ( /* require, exports, module */ ) {
 	}
 
 	function table_maker(oldData) {
+		console.log(oldData);
 		var table;
 		var tbody;
 		var row1 = false;
 		var col1 = true;
 		var tr;
 		var td;
+		var all_elm;
 		clipboard = $(oldData);
 		//console.log(clipboard);
 		[].forEach.call(clipboard, function (elm) {
@@ -36,6 +38,7 @@ define(function ( /* require, exports, module */ ) {
 		});
 		tbody = table.querySelector("tbody");
 		tr = tbody.children;
+		all_elm = table.querySelectorAll("*");
 		td = table.querySelectorAll("td");
 		
 		if (tr.length === 1) { //1行かどうか
@@ -47,6 +50,14 @@ define(function ( /* require, exports, module */ ) {
 				col1 = false;
 			}
 		});
+
+		[].forEach.call(all_elm, function (elm) {//余分な要素を削除
+			["width", "height", "style", "class"].forEach(function(attr){
+				elm.removeAttribute(attr);
+			});
+		});
+
+
 		if (col1) {
 			//console.log("1列!");
 		}
@@ -60,19 +71,18 @@ define(function ( /* require, exports, module */ ) {
 			return;
 		}
 
-		//tdが特定のクラスを持っていたらthに差し替え。
-		/*[].forEach.call(td, function(elm, i, arr){
-			if(elm.classList.contains("xl65") || elm.classList.contains("xl66")){
+		//[th]が付いてたらthに差し替え。
+		[].forEach.call(td, function(elm, i, arr){
+			if(/^\[th\]/.test(elm.innerHTML)){
 				var th = document.createElement("th");
-				th.innerHTML = elm.innerHTML;
+				th.innerHTML = elm.innerHTML.replace(/^\[th\]/, "");
 				elm.parentNode.insertBefore(th, elm);
 				elm.parentNode.removeChild(elm);
 			}
-		}); */
+		});
 		
 		table = tbody.innerHTML;
 		table = table.replace(/<!--(.*?)-->\n/g, "");
-		table = table.replace(/ (width|height|style|class)="(.*?)"/g, "");
 		table = table.replace(/<br>\n/gm, "<br>");
 		table = table.replace(/<br>(\s*)/g, "<br>");
 		table = '<table class="xxx">\n<tbody>\n' + table + '</tbody>\n</table>';
