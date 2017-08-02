@@ -77,6 +77,12 @@ define(function ( /* require, exports, module */ ) {
 			if (/^\[th\]/.test(elm.innerHTML)) {
 				var th = document.createElement("th");
 				th.innerHTML = elm.innerHTML.replace(/^\[th\]/, "");
+				if(elm.getAttribute("colspan")){
+					th.setAttribute("colspan", elm.getAttribute("colspan"));
+				}
+				if(elm.getAttribute("rowspan")){
+					th.setAttribute("rowspan", elm.getAttribute("rowspan"));
+				}
 				elm.parentNode.insertBefore(th, elm);
 				elm.parentNode.removeChild(elm);
 			}
