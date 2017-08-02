@@ -1,20 +1,16 @@
-define(function (/* require, exports, module */) {
+define(function ( /* require, exports, module */ ) {
 	"use strict";
 	var EditorManager = brackets.getModule('editor/EditorManager'),
 		DocumentManager = brackets.getModule("document/DocumentManager"),
 		MainViewManager = brackets.getModule('view/MainViewManager'),
+		AppInit = brackets.getModule("utils/AppInit"),
 		editor,
 		codeMirror,
+		clipboard,
 		running = false;
 
-
-	function isFileExt(ext) {
-		var fileType = DocumentManager.getCurrentDocument().getLanguage()._id;
-		if (fileType.match(new RegExp(ext, "i"))){
-			return fileType.toLowerCase();
-		}
-		return false;
-	}
+	var _change_from,
+		_from;
 
 	function reindent(codeMirror, from, to) {
 		codeMirror.operation(function () {
@@ -24,17 +20,61 @@ define(function (/* require, exports, module */) {
 		});
 	}
 
-	function arrayToText(text) {
-		var all = "";
-		for (var i = 0, l = text.length; i < l; i++) {
-			all = all + text[i];
+	function table_maker(oldData) {
+		var table;
+		var tbody;
+		var row1 = false;
+		var col1 = true;
+		var tr;
+		clipboard = $(oldData);
+		//console.log(clipboard);
+		[].forEach.call(clipboard, function (elm) {
+			if (elm.nodeName === "TABLE") {
+				table = elm;
+			}
+		});
+		table = $(table)[0].children;
+		//console.log(table);
+		[].forEach.call(table, function (elm) {
+			if (elm.nodeName === "TBODY") {
+				tbody = elm;
+			}
+		});
+		tr = tbody.children;
+		if (tr.length === 1) { //1行かどうか
+			row1 = true;
+			//console.log("1行!");
 		}
-		return all;
+		[].forEach.call(tr, function (elm) {
+			if (elm.children.length !== 1) { //全行が1列かどうか
+				col1 = false;
+			}
+		});
+		if (col1) {
+			//console.log("1列!");
+		}
+
+		if (row1 || col1) {
+			//console.log("1行または1列なので、何もしない!");
+			if (row1 && col1) {
+				noIndention(tbody.children[0].children[0].textContent);
+			}
+			return;
+		}
+		table = tbody.innerHTML;
+		table = table.replace(/<!--(.*?)-->\n/g, "");
+		table = table.replace(/ (width|height|style|class)="(.*?)"/g, "");
+		table = table.replace(/<br>\n/gm, "<br>");
+		table = table.replace(/<br>(\s*)/g, "<br>");
+		table = '<table class="xxx">\n<tbody>\n' + table + '</tbody>\n</table>';
+		codeMirror.replaceRange(table, _change_from, _from);
+		reindent(codeMirror, _change_from.line, _change_from.line * 1 + table.match(/\n/mig).length + 1);
 	}
 
-
-	function table_maker(text){
-		return "ほげげ\n" + text;
+	function noIndention(moji) {
+		//console.log("noIndention");
+		codeMirror.replaceRange(moji, _change_from, _from);
+		reindent(codeMirror, _change_from.line, _change_from.line * 1 + moji.match(/\n/mig).length + 1);
 	}
 
 	MainViewManager.on("currentFileChange", function () {
@@ -44,14 +84,13 @@ define(function (/* require, exports, module */) {
 		}
 		codeMirror = editor._codeMirror;
 		codeMirror.on("change", function (codeMirror, change) {
-			if (change.origin !== "paste" || change.origin != "paste" || running || !change.text[0].match(/[<>]/mig)) {
+			//console.log(change);
+			//console.log("change!");
+			if (change.origin !== "paste" || change.origin != "paste" || running) {
 				return;
 			}
 
-			var	text = change.text,
-				from = codeMirror.getCursor(true),
-				to = codeMirror.getCursor(false),
-				line = codeMirror.getLine(from.line);
+			var from = codeMirror.getCursor(true);
 
 			running = true;
 			// at least 80ms until the next run.
@@ -59,64 +98,26 @@ define(function (/* require, exports, module */) {
 				running = false;
 			}, 80);
 
-			text = arrayToText(text);
-
-			if (!text.length) {
-				return;
-			}
-			text = table_maker(text);
-			codeMirror.replaceRange(text, change.from, from);
-			reindent(codeMirror, change.from.line, change.from.line * 1 + text.match(/\n/mig).length + 1);
-
+			_change_from = change.from;
+			_from = from;
 		});
 	});
-});
-
-
-
-function faaaaaaa() {
-	"use strict";
-
-	var DocumentManager = brackets.getModule("document/DocumentManager"),
-		EditorManager = brackets.getModule("editor/EditorManager"),
-		AppInit = brackets.getModule("utils/AppInit");
-
-	var regExp = new RegExp("(\r?\n)$");
-	var regExpG = new RegExp("(\r?\n)$", "g");
 
 	function init() {
 		document.addEventListener('paste', function (e) {
+			//console.log("paste!");
 			var oldData = e.clipboardData.getData("text/html");
-			if (/^<html xmlns/.test(oldData)) {
-				main(oldData);
+			if (oldData) {
+				//alert("htmlと認識された！");
+				var currentDoc = DocumentManager.getCurrentDocument();
+				currentDoc.batchOperation(function () {
+					table_maker(oldData);
+				});
 			}
 		});
 	}
 
-	function main(oldData) {
-		var currentDoc = DocumentManager.getCurrentDocument();
-		var editor = EditorManager.getCurrentFullEditor();
-		var selection = editor.getSelections()[0];
-		var $newData = $(oldData);
-		var table;
-		var tbody;
-		[].forEach.call($newData, function (elm) {
-			if (elm.nodeName === "TABLE") {
-				table = elm;
-			}
-		});
-		table = $(table)[0].children;
-		console.log(table);
-		[].forEach.call(table, function (elm) {
-			if (elm.nodeName === "TBODY") {
-				tbody = elm;
-			}
-		});
-		table = "<table><tbody>" + tbody.innerHTML + "</tbody></table>";
-		table = table.replace("<!--EndFragment-->\n", "");
-		table = table.replace(/ (width|height|style|class)="(.*?)"/g, "");
-		table = table.replace(/<br> /g, "<br>");
-		editor.document.replaceRange(table, selection.start, selection.end);
-	}
-
-}
+	AppInit.appReady(function () {
+		init();
+	});
+});
