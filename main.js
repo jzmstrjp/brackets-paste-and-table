@@ -132,13 +132,42 @@ define(function ( /* require, exports, module */ ) {
 		document.addEventListener('paste', function (e) {
 			//console.log("paste!");
 			var oldData = e.clipboardData.getData("text/html");
+			var oldTxtData = e.clipboardData.getData("text");
+			var regExp = new RegExp("(\r?\n)$");
 			if (oldData) {
 				//alert("htmlと認識された！");
 				var currentDoc = DocumentManager.getCurrentDocument();
 				currentDoc.batchOperation(function () {
 					table_maker(oldData);
 				});
+			}else{
+				//alert("oldNoIndention");
+				if(regExp.test(oldTxtData)){
+					//console.log("改行あり！");
+					oldNoIndention(oldTxtData);
+				}
 			}
+		});
+	}
+
+	function oldNoIndention(oldTxtData) {
+		var regExpG = new RegExp("(\r?\n)$", "g");
+		var currentDoc = DocumentManager.getCurrentDocument();
+		var editor = EditorManager.getCurrentFullEditor();
+		var selections = editor.getSelections();
+		var brs = oldTxtData.match(regExpG).length;
+		var lines = brs + 1;
+		if(brs > 1 && lines === selections.length){
+			return;
+		}
+		currentDoc.batchOperation(function(){
+			selections.forEach(function(sel, i) {
+				var newSelections = editor.getSelections();
+				var selEnd = newSelections[i].end;
+				selEnd.line = selEnd.line - 1;
+				selEnd.ch = 1000;
+				editor.document.replaceRange("", newSelections[i].start, selEnd);
+			});
 		});
 	}
 

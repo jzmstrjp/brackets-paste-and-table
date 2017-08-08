@@ -1,8 +1,8 @@
 {
     "name": "jzmstrjp.paste-and-table",
     "title": "Excel To Table",
-    "description": "Please copy and paste from Excel or Google spreadsheets, and this extension makes table. If you put the word [th] at the beginning of the cell, it's becomes a th tag.",
-    "version": "1.0.6",
+    "description": "Please copy and paste from Excel or Google spreadsheets, and this extension makes table. If you put the word [th] at the beginning of the cell, it becomes a th tag.",
+    "version": "1.0.8",
     "author": "jzmstrjp",
     "license": "MIT",
     "homepage": "https://github.com/jzmstrjp/brackets-paste-and-table",
