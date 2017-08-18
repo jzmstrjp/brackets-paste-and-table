@@ -76,7 +76,7 @@ define(function ( /* require, exports, module */ ) {
 		}
 
 		//[th]が付いてたらthに差し替え。
-		[].forEach.call(td, function (elm, i, arr) {
+		[].forEach.call(td, function (elm) {
 			if (/^\[th\]/.test(elm.innerHTML)) {
 				var th = document.createElement("th");
 				th.innerHTML = elm.innerHTML.replace(/^\[th\]/, "");
@@ -160,6 +160,13 @@ define(function ( /* require, exports, module */ ) {
 		var selections = editor.getSelections();
 		var brs = oldTxtData.match(regExpG).length;
 		var lines = brs + 1;
+		var mode = editor.getModeForSelection();
+		var cssLikeModeRegExp = /^(text\/x-less|text\/x-scss|css)$/;
+		//alert(mode);
+		if(mode !== "html"){
+			//alert("htmlじゃないから改行取るのはやめよう");
+			return;
+		}
 		if(brs > 1 && lines === selections.length){
 			return;
 		}
