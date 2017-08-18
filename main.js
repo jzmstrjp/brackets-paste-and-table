@@ -31,6 +31,9 @@ define(function ( /* require, exports, module */ ) {
 		var all_elm;
 		var attrArr = ["width", "height", "style", "class", "data-sheets-value", "data-sheets-numberformat", "data-sheets-formula", "data-sheets-note"];
 		clipboard = $(oldData);
+		if(!clipboard.filter("style").length){
+			return;
+		}
 		//console.log(clipboard);
 		[].forEach.call(clipboard, function (elm) {
 			if (elm.nodeName === "TABLE") {
